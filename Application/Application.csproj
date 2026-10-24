@@ -1,0 +1,29 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Folder Include="AuditLogs\Validations\" />
+    <Folder Include="Employees\Validations\" />
+    <Folder Include="PaymentMethods\Validations\" />
+    <Folder Include="Products\Validations\" />
+    <Folder Include="ProviderMovements\Validations\" />
+    <Folder Include="Providers\Validations\" />
+    <Folder Include="Sales\Validations\" />
+    <Folder Include="Sessions\Validations\" />
+    <Folder Include="Users\Validations\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="LinqKit.Core" Version="1.2.9" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Domain\Domain.csproj" />
+  </ItemGroup>
+
+</Project>
