@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="VerticeMobile.ProductListPage"
+             Title="Buscar por Nombre">
+
+    <Grid RowDefinitions="Auto, *" Padding="15">
+
+        <!-- Barra de búsqueda -->
+        <SearchBar Grid.Row="0" 
+                   x:Name="searchBar" 
+                   Placeholder="Ej: Coca Cola, Alfajor..." 
+                   TextChanged="OnSearchTextChanged"
+                   CancelButtonColor="Red" />
+
+        <!-- Ruedita de carga -->
+        <ActivityIndicator Grid.Row="1" x:Name="loadingIndicator" IsRunning="True" HorizontalOptions="Center" VerticalOptions="Center" />
+
+        <!-- Lista de productos -->
+        <CollectionView Grid.Row="1" 
+                        x:Name="cvProducts" 
+                        SelectionMode="Single" 
+                        SelectionChanged="OnProductSelected"
+                        IsVisible="False">
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Border Padding="10" Margin="0,5" StrokeShape="RoundRectangle 5" BackgroundColor="#f8f9fa">
+                        <Grid ColumnDefinitions="*, Auto" RowDefinitions="Auto, Auto">
+                            <Label Grid.Row="0" Grid.Column="0" Text="{Binding Name}" FontAttributes="Bold" FontSize="16" TextColor="#333" />
+                            <Label Grid.Row="1" Grid.Column="0" Text="{Binding Code}" FontSize="12" TextColor="Gray" />
+
+                            <VerticalStackLayout Grid.Row="0" Grid.RowSpan="2" Grid.Column="1" HorizontalOptions="End" VerticalOptions="Center">
+                                <Label Text="{Binding SalePrice, StringFormat='{0:C0}'}" FontAttributes="Bold" TextColor="Green" FontSize="16" HorizontalOptions="End" />
+                                <Label Text="{Binding Stock, StringFormat='Stock: {0}'}" FontSize="12" TextColor="#666" HorizontalOptions="End" />
+                            </VerticalStackLayout>
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+    </Grid>
+</ContentPage>

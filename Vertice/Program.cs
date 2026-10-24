@@ -44,7 +44,7 @@ namespace Vertice
         {
             ApplicationConfiguration.Initialize();
 
-            // Mientras el sistema está abierto existe este mutex: el instalador (AppMutex en
+            // Mientras el sistema está abierto existe este mutex: el instalador (InitializeSetup en
             // Instalador\VerticePOS.iss) lo usa para esperar a que se cierre antes de actualizar.
             using var appMutex = new Mutex(false, "VerticePOS_App");
 
@@ -268,6 +268,7 @@ namespace Vertice
                 services.AddTransient<FormPendingInvoices>();
                 services.AddTransient<FormPrintLabels>();
                 services.AddTransient<FormFirstAdmin>();
+                services.AddTransient<UpdateService>();
                 services.AddTransient<TicketPrinter>();
 
                 //DI Data

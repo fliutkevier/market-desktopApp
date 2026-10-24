@@ -37,6 +37,13 @@
             lblApiPath = new Krypton.Toolkit.KryptonLabel();
             cbxPrinters = new Krypton.Toolkit.KryptonComboBox();
             btnSavePrinter = new Krypton.Toolkit.KryptonButton();
+            lblUpdatesTitle = new Krypton.Toolkit.KryptonLabel();
+            lblVersion = new Krypton.Toolkit.KryptonLabel();
+            btnCheckUpdates = new Krypton.Toolkit.KryptonButton();
+            lblUpdateStatus = new Label();
+            pbUpdate = new ProgressBar();
+            btnInstallUpdate = new Krypton.Toolkit.KryptonButton();
+            btnPreviousVersions = new Krypton.Toolkit.KryptonButton();
             tlpSettings.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)cbxPrinters).BeginInit();
             SuspendLayout();
@@ -57,6 +64,13 @@
             tlpSettings.Controls.Add(lblApiPath, 0, 4);
             tlpSettings.Controls.Add(cbxPrinters, 0, 5);
             tlpSettings.Controls.Add(btnSavePrinter, 1, 5);
+            tlpSettings.Controls.Add(lblUpdatesTitle, 3, 1);
+            tlpSettings.Controls.Add(lblVersion, 3, 2);
+            tlpSettings.Controls.Add(btnCheckUpdates, 3, 3);
+            tlpSettings.Controls.Add(lblUpdateStatus, 3, 4);
+            tlpSettings.Controls.Add(pbUpdate, 3, 5);
+            tlpSettings.Controls.Add(btnInstallUpdate, 3, 6);
+            tlpSettings.Controls.Add(btnPreviousVersions, 4, 6);
             tlpSettings.Dock = DockStyle.Fill;
             tlpSettings.Location = new Point(0, 0);
             tlpSettings.Name = "tlpSettings";
@@ -95,12 +109,12 @@
             btnRecicle.Values.DropDownArrowColor = Color.Empty;
             btnRecicle.Values.Text = "PAPELERA DE RECICLAJE";
             btnRecicle.Click += btnRecicle_Click;
-            //
+            // 
             // btnPendingInvoices
-            //
+            // 
             btnPendingInvoices.Anchor = AnchorStyles.None;
             tlpSettings.SetColumnSpan(btnPendingInvoices, 2);
-            btnPendingInvoices.Location = new Point(100, 183);
+            btnPendingInvoices.Location = new Point(100, 182);
             btnPendingInvoices.Name = "btnPendingInvoices";
             btnPendingInvoices.Size = new Size(312, 40);
             btnPendingInvoices.StateCommon.Back.Color1 = Color.FromArgb(255, 214, 153);
@@ -109,7 +123,7 @@
             btnPendingInvoices.Values.DropDownArrowColor = Color.Empty;
             btnPendingInvoices.Values.Text = "FACTURACIÓN PENDIENTE (ARCA)";
             btnPendingInvoices.Click += btnPendingInvoices_Click;
-            //
+            // 
             // lblPathTitle
             // 
             lblPathTitle.Anchor = AnchorStyles.None;
@@ -172,6 +186,93 @@
             btnSavePrinter.Values.Text = "GUARDAR";
             btnSavePrinter.Click += btnSavePrinter_Click;
             // 
+            // lblUpdatesTitle
+            // 
+            lblUpdatesTitle.Anchor = AnchorStyles.None;
+            tlpSettings.SetColumnSpan(lblUpdatesTitle, 2);
+            lblUpdatesTitle.LabelStyle = Krypton.Toolkit.LabelStyle.TitlePanel;
+            lblUpdatesTitle.Location = new Point(927, 103);
+            lblUpdatesTitle.Name = "lblUpdatesTitle";
+            lblUpdatesTitle.Size = new Size(194, 36);
+            lblUpdatesTitle.StateNormal.ShortText.Font = new Font("Microsoft Tai Le", 18F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            lblUpdatesTitle.TabIndex = 27;
+            lblUpdatesTitle.Values.Text = "Actualizaciones";
+            // 
+            // lblVersion
+            // 
+            lblVersion.Anchor = AnchorStyles.None;
+            tlpSettings.SetColumnSpan(lblVersion, 2);
+            lblVersion.Location = new Point(943, 191);
+            lblVersion.Name = "lblVersion";
+            lblVersion.Size = new Size(162, 23);
+            lblVersion.StateNormal.Padding = new Padding(10, 1, 10, 1);
+            lblVersion.StateNormal.ShortText.Font = new Font("Microsoft Sans Serif", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            lblVersion.TabIndex = 28;
+            lblVersion.Values.Text = "Versión instalada:";
+            // 
+            // btnCheckUpdates
+            // 
+            btnCheckUpdates.Anchor = AnchorStyles.None;
+            tlpSettings.SetColumnSpan(btnCheckUpdates, 2);
+            btnCheckUpdates.Location = new Point(868, 263);
+            btnCheckUpdates.Name = "btnCheckUpdates";
+            btnCheckUpdates.Size = new Size(312, 40);
+            btnCheckUpdates.StateCommon.Back.Color1 = Color.FromArgb(160, 205, 254);
+            btnCheckUpdates.StateCommon.Content.ShortText.Font = new Font("Microsoft Sans Serif", 11.25F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            btnCheckUpdates.TabIndex = 29;
+            btnCheckUpdates.Values.DropDownArrowColor = Color.Empty;
+            btnCheckUpdates.Values.Text = "BUSCAR ACTUALIZACIONES";
+            btnCheckUpdates.Click += btnCheckUpdates_Click;
+            // 
+            // lblUpdateStatus
+            // 
+            tlpSettings.SetColumnSpan(lblUpdateStatus, 2);
+            lblUpdateStatus.Dock = DockStyle.Fill;
+            lblUpdateStatus.Font = new Font("Microsoft Sans Serif", 11.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            lblUpdateStatus.ForeColor = Color.FromArgb(20, 25, 70);
+            lblUpdateStatus.Location = new Point(771, 324);
+            lblUpdateStatus.Name = "lblUpdateStatus";
+            lblUpdateStatus.Size = new Size(506, 81);
+            lblUpdateStatus.TabIndex = 30;
+            lblUpdateStatus.TextAlign = ContentAlignment.MiddleCenter;
+            // 
+            // pbUpdate
+            // 
+            pbUpdate.Anchor = AnchorStyles.None;
+            tlpSettings.SetColumnSpan(pbUpdate, 2);
+            pbUpdate.Location = new Point(868, 432);
+            pbUpdate.Name = "pbUpdate";
+            pbUpdate.Size = new Size(312, 26);
+            pbUpdate.TabIndex = 31;
+            pbUpdate.Visible = false;
+            // 
+            // btnInstallUpdate
+            // 
+            btnInstallUpdate.Anchor = AnchorStyles.None;
+            btnInstallUpdate.Location = new Point(806, 506);
+            btnInstallUpdate.Name = "btnInstallUpdate";
+            btnInstallUpdate.Size = new Size(180, 40);
+            btnInstallUpdate.StateCommon.Back.Color1 = Color.FromArgb(178, 233, 178);
+            btnInstallUpdate.StateCommon.Content.ShortText.Font = new Font("Microsoft Sans Serif", 11.25F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            btnInstallUpdate.TabIndex = 32;
+            btnInstallUpdate.Values.DropDownArrowColor = Color.Empty;
+            btnInstallUpdate.Values.Text = "INSTALAR";
+            btnInstallUpdate.Visible = false;
+            btnInstallUpdate.Click += btnInstallUpdate_Click;
+            // 
+            // btnPreviousVersions
+            // 
+            btnPreviousVersions.Anchor = AnchorStyles.None;
+            btnPreviousVersions.Location = new Point(1034, 506);
+            btnPreviousVersions.Name = "btnPreviousVersions";
+            btnPreviousVersions.Size = new Size(236, 40);
+            btnPreviousVersions.StateCommon.Back.Color1 = Color.FromArgb(230, 233, 240);
+            btnPreviousVersions.StateCommon.Content.ShortText.Font = new Font("Microsoft Sans Serif", 11.25F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            btnPreviousVersions.TabIndex = 33;
+            btnPreviousVersions.Values.DropDownArrowColor = Color.Empty;
+            btnPreviousVersions.Values.Text = "VERSIONES ANTERIORES";
+            btnPreviousVersions.Click += btnPreviousVersions_Click;
+            // 
             // UserControlSettings
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -197,5 +298,12 @@
         private Krypton.Toolkit.KryptonLabel lblApiPath;
         private Krypton.Toolkit.KryptonComboBox cbxPrinters;
         private Krypton.Toolkit.KryptonButton btnSavePrinter;
+        private Krypton.Toolkit.KryptonLabel lblUpdatesTitle;
+        private Krypton.Toolkit.KryptonLabel lblVersion;
+        private Krypton.Toolkit.KryptonButton btnCheckUpdates;
+        private Label lblUpdateStatus;
+        private ProgressBar pbUpdate;
+        private Krypton.Toolkit.KryptonButton btnInstallUpdate;
+        private Krypton.Toolkit.KryptonButton btnPreviousVersions;
     }
 }

@@ -47,9 +47,8 @@ SolidCompression=yes
 ; Necesario para crear carpetas en ProgramData y Program Files
 PrivilegesRequired=admin
 ArchitecturesInstallIn64BitMode=x64compatible
-; El sistema crea este mutex mientras está abierto: el instalador espera a que se cierre
-; antes de copiar archivos (si no, quedarían archivos en uso a medio reemplazar).
-AppMutex=VerticePOS_App
+; Si quedara algún archivo del sistema en uso, Windows lo cierra antes de reemplazarlo.
+; (La espera a que el sistema se cierre está en InitializeSetup, más abajo.)
 CloseApplications=yes
 
 [Languages]
@@ -77,6 +76,43 @@ Name: "{commondesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: 
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#MyAppName}}"; Flags: nowait postinstall
 
 [Code]
+const
+  APP_MUTEX = 'VerticePOS_App'; // Lo crea el sistema mientras está abierto (Program.cs)
+
+// Cuando la actualización se lanza desde el propio sistema, el instalador arranca mientras el
+// sistema todavía se está cerrando. Se espera hasta 30 segundos a que termine; si no, en modo
+// manual se le pide al usuario que lo cierre, y en modo automático se cancela sin tocar nada.
+function InitializeSetup(): Boolean;
+var
+  Intentos: Integer;
+begin
+  Intentos := 0;
+  while CheckForMutexes(APP_MUTEX) and (Intentos < 60) do
+  begin
+    Sleep(500);
+    Intentos := Intentos + 1;
+  end;
+
+  while CheckForMutexes(APP_MUTEX) do
+  begin
+    if WizardSilent then
+    begin
+      Log('Vertice POS sigue abierto: se cancela la actualización.');
+      Result := False;
+      Exit;
+    end;
+
+    if MsgBox('Vertice POS está abierto. Ciérrelo y presione Aceptar para continuar.',
+              mbError, MB_OKCANCEL) = IDCANCEL then
+    begin
+      Result := False;
+      Exit;
+    end;
+  end;
+
+  Result := True;
+end;
+
 // Migración única de las instalaciones viejas, que tenían los datos del cliente en
 // {app}\appsettings.json y los certificados en {app}\Services. Corre ANTES de copiar los
 // archivos nuevos (que traen un appsettings.json genérico). Nunca pisa nada que ya exista,
