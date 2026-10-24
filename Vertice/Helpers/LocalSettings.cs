@@ -54,7 +54,14 @@ namespace WinForms.Helpers
             // Se escribe en un temporal y después se reemplaza: si se corta la luz a mitad de
             // la escritura, el archivo bueno no queda a medias.
             string tempPath = FilePath + ".tmp";
-            File.WriteAllText(tempPath, root.ToJsonString(new JsonSerializerOptions { WriteIndented = true }));
+            // UnsafeRelaxedJsonEscaping: guarda "Almacén" tal cual y no "Almacén", para que el
+            // archivo se pueda leer y editar a mano. Es un archivo local, nunca va a una página web.
+            var options = new JsonSerializerOptions
+            {
+                WriteIndented = true,
+                Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+            };
+            File.WriteAllText(tempPath, root.ToJsonString(options));
             File.Move(tempPath, FilePath, overwrite: true);
         }
     }

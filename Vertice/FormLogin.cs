@@ -1,4 +1,4 @@
-using Application.Users.Interfaces;
+ï»¿using Application.Users.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using WinForms;
 using WinForms.AdminForms;
@@ -27,11 +27,11 @@ namespace Vertice
         {
             string userName = txtUsername.Text.Trim();
             string password = txtPassword.Text.Trim();
-            //Verificación
+            //VerificaciÃ³n
 
             if (string.IsNullOrEmpty(userName) || string.IsNullOrEmpty(password))
             {
-                MessageBox.Show("Por favor ingrese usuario y contraseña.");
+                MessageBox.Show("Por favor ingrese usuario y contraseÃ±a.");
                 return;
             }
 
@@ -45,7 +45,7 @@ namespace Vertice
 
                 if(!isValid)
                 {
-                    MessageBox.Show("Usuario o contraseña incorrectos.", "Error de Ingreso", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    MessageBox.Show("Usuario o contraseÃ±a incorrectos.", "Error de Ingreso", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
 
@@ -59,7 +59,7 @@ namespace Vertice
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ocurrió un error al intentar iniciar sesión: {ex.Message}", "Error Crítico", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"OcurriÃ³ un error al intentar iniciar sesiÃ³n: {ex.Message}", "Error CrÃ­tico", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             finally
             {

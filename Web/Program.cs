@@ -1,4 +1,4 @@
-using Application.Products;
+Ôªøusing Application.Products;
 using Application.Products.Interfaces;
 using Domain.RepositoryInterfaces;
 using Infrastructure.Persistence;
@@ -9,11 +9,11 @@ using Application.AuditLogs;
 using Application.AuditLogs.Interfaces;
 var builder = WebApplication.CreateBuilder(args);
 
-// 1. Configurar Base de Datos (Le pasamos la conexiÛn del appsettings.json)
+// 1. Configurar Base de Datos (Le pasamos la conexi√≥n del appsettings.json)
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// 2. InyecciÛn de Dependencias (El motor de la app)
+// 2. Inyecci√≥n de Dependencias (El motor de la app)
 // Repositorios
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
@@ -23,8 +23,8 @@ builder.Services.AddScoped<IAuditLogRepository, AuditLogRepository>();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IAuditLogService, AuditLogService>();
 
-// CRÕTICO: El ProductService necesita un IUserSessionService.
-// Como ac· no hay pantalla de Login, le pasamos una implementaciÛn hardcodeada temporal.
+// CR√çTICO: El ProductService necesita un IUserSessionService.
+// Como ac√° no hay pantalla de Login, le pasamos una implementaci√≥n hardcodeada temporal.
 builder.Services.AddScoped<IUserSessionService, ApiDummySessionService>();
 
 builder.Services.AddControllers();
@@ -39,14 +39,14 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-// ATENCI”N: Comentamos la redirecciÛn HTTPS. 
-// Los celulares (Android/iOS) bloquean las peticiones HTTPS locales porque el certificado de desarrollo de tu PC no es v·lido para ellos.
+// ATENCI√ìN: Comentamos la redirecci√≥n HTTPS. 
+// Los celulares (Android/iOS) bloquean las peticiones HTTPS locales porque el certificado de desarrollo de tu PC no es v√°lido para ellos.
 // Para probar en la red local, usamos HTTP plano.
 // app.UseHttpsRedirection(); 
 
 app.UseAuthorization();
 app.MapControllers();
 
-// 3. ConfiguraciÛn de Red: 0.0.0.0 significa "Escuchar en todas mis IPs (LAN y Localhost)"
-// El puerto 5000 es el est·ndar de HTTP para .NET.
+// 3. Configuraci√≥n de Red: 0.0.0.0 significa "Escuchar en todas mis IPs (LAN y Localhost)"
+// El puerto 5000 es el est√°ndar de HTTP para .NET.
 app.Run("http://0.0.0.0:5000");

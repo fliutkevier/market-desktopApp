@@ -1,4 +1,4 @@
-using Application.Products.Dtos;
+ï»¿using Application.Products.Dtos;
 using Application.Products.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,7 +8,7 @@ namespace Web.Controllers
     [Route("[controller]")]
     public class Products : ControllerBase
     {
-        // Constante con el código exacto de tu producto comodín
+        // Constante con el cÃ³digo exacto de tu producto comodÃ­n
         private const string CODIGO_VARIOS = "VARIOS";
         private readonly IProductService _productService;
 
@@ -19,11 +19,11 @@ namespace Web.Controllers
         }
 
         // GET: api/products/779123456789
-        // El celular escanea y llama a este método para ver si el producto existe
+        // El celular escanea y llama a este mÃ©todo para ver si el producto existe
         [HttpGet("{code}")]
         public async Task<IActionResult> GetProduct(string code)
         {
-            // 2. BLOQUEO BÚSQUEDA DIRECTA: Si intentan escanear o buscar "VARIOS" a mano, fingimos que no existe
+            // 2. BLOQUEO BÃšSQUEDA DIRECTA: Si intentan escanear o buscar "VARIOS" a mano, fingimos que no existe
             if (code == CODIGO_VARIOS)
                 return NotFound();
 
@@ -36,21 +36,21 @@ namespace Web.Controllers
         }
 
         // PUT: api/products/779123456789
-        // El celular modifica el stock o el precio y manda la actualización
+        // El celular modifica el stock o el precio y manda la actualizaciÃ³n
         [HttpPut("{code}")]
         public async Task<IActionResult> UpdateProduct(string code, [FromBody] UpdateProductDto dto)
         {
             if (code != dto.Code)
-                return BadRequest("El código no coincide");
+                return BadRequest("El cÃ³digo no coincide");
 
             try
             {
                 await _productService.UpdateProductAsync(dto);
-                return NoContent(); // 204: Todo salió bien, no hay nada más que decir
+                return NoContent(); // 204: Todo saliÃ³ bien, no hay nada mÃ¡s que decir
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message); // Le manda el error de validación al celular
+                return BadRequest(ex.Message); // Le manda el error de validaciÃ³n al celular
             }
         }
 
@@ -69,11 +69,11 @@ namespace Web.Controllers
             try
             {
                 await _productService.CreateProductAsync(dto);
-                return NoContent(); // 204: Todo salió bien, no hay nada más que decir
+                return NoContent(); // 204: Todo saliÃ³ bien, no hay nada mÃ¡s que decir
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message); // Le manda el error de validación al celular
+                return BadRequest(ex.Message); // Le manda el error de validaciÃ³n al celular
             }
         }
 

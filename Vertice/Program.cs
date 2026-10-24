@@ -85,7 +85,7 @@ namespace Vertice
 
                 if (string.IsNullOrWhiteSpace(apiPath) || !File.Exists(apiPath))
                 {
-                    MessageBox.Show("El servidor del celular no est� configurado o la ruta es incorrecta.\n\nPor favor, vaya a la secci�n 'Ajustes' en el sistema y seleccione el archivo ejecutable de la API.", "Servidor Offline", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageBox.Show("El servidor del celular no está configurado o la ruta es incorrecta.\n\nPor favor, vaya a la sección 'Ajustes' en el sistema y seleccione el archivo ejecutable de la API.", "Servidor Offline", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     return;
                 }
 
@@ -102,7 +102,7 @@ namespace Vertice
             }
             catch (Exception ex)
             {
-                MessageBox.Show("No se pudo iniciar el servicio del esc�ner m�vil: " + ex.Message, "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("No se pudo iniciar el servicio del escáner móvil: " + ex.Message, "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
 
@@ -116,7 +116,7 @@ namespace Vertice
                     _apiProcess.Dispose();
                 }
             }
-            catch { /* Ignoramos si ya se cerr� por su cuenta */ }
+            catch { /* Ignoramos si ya se cerró por su cuenta */ }
         }
 
         private static void SeedDatabase(IServiceProvider services)
@@ -127,13 +127,13 @@ namespace Vertice
 
                 try
                 {
-                    // Verificamos si existe el producto "Comod�n"
+                    // Verificamos si existe el producto "Comodín"
                     if (!context.Products.Any(p => p.Code == "VARIOS"))
                     {
                         var productoVarios = new Product
                         {
                             Code = "VARIOS",
-                            Name = "Varios / Fiambrer�a",
+                            Name = "Varios / Fiambrería",
                             SalePrice = 0,
                             CostPrice = 0,
                             Stock = 999999,
@@ -193,9 +193,9 @@ namespace Vertice
                 {
                     MessageBox.Show(
                         "Error fatal: No se pudo conectar o aplicar las migraciones a la base de datos.\n" +
-                        "La aplicaci�n se cerrar�.\n\n" +
+                        "La aplicación se cerrará.\n\n" +
                         "Error: " + ex.Message,
-                        "Error Cr�tico de Base de Datos",
+                        "Error Crítico de Base de Datos",
                         MessageBoxButtons.OK,
                         MessageBoxIcon.Error);
 
