@@ -231,6 +231,7 @@
             chkAFIP.StateCommon.ShortText.Font = new Font("Microsoft Sans Serif", 12F, FontStyle.Bold);
             chkAFIP.TabIndex = 42;
             chkAFIP.Values.Text = "Facturado";
+            chkAFIP.Visible = false;
             // 
             // FormSaleDetail
             // 
