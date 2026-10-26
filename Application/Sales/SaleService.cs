@@ -105,6 +105,7 @@ namespace Application.Sales
                     ProductName = product.Name,
                     Quantity = itemDto.Quantity,
                     UnitPrice = finalPrice,
+                    CostPrice = product.CostPrice, // costo del momento, para control de ganancias
                     SubTotal = finalPrice * itemDto.Quantity
                 };
 
@@ -222,6 +223,7 @@ namespace Application.Sales
                 ProductName = d.ProductName,
                 Quantity = d.Quantity,
                 UnitPrice = d.UnitPrice,
+                CostPrice = d.CostPrice,
                 SubTotal = d.SubTotal
             });
         }

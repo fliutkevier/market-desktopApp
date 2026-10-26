@@ -14,6 +14,14 @@ namespace Domain.Entities
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
         public decimal UnitPrice { get; set; }
+
+        /// <summary>
+        /// Costo unitario del producto al momento de la venta (foto de Product.CostPrice).
+        /// Si después cambia el costo del producto, esta venta conserva el suyo: sirve para
+        /// calcular la ganancia real de cada venta.
+        /// </summary>
+        public decimal CostPrice { get; set; }
+
         public int Quantity { get; set; }
         public decimal SubTotal { get; set; }
         public string ProductName { get; set; } = string.Empty;

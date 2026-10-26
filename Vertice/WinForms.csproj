@@ -8,7 +8,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <!-- Versión del sistema: única fuente. El instalador (Instalador\VerticePOS.iss) y el
          actualizador la leen de acá. Subirla en cada versión que se publique. -->
-    <Version>1.9.1</Version>
+    <Version>1.10.0</Version>
   </PropertyGroup>
 
   <ItemGroup>

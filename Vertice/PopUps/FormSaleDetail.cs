@@ -111,6 +111,12 @@ namespace WinForms.PopUps
                 dgvProducts.Columns["UnitPrice"].DefaultCellStyle.Format = "C2";
             }
 
+            if (dgvProducts.Columns["CostPrice"] != null)
+            {
+                dgvProducts.Columns["CostPrice"].HeaderText = "Costo Unit.";
+                dgvProducts.Columns["CostPrice"].DefaultCellStyle.Format = "C2";
+            }
+
             if (dgvProducts.Columns["SubTotal"] != null)
             {
                 dgvProducts.Columns["SubTotal"].HeaderText = "Subtotal";

@@ -58,6 +58,8 @@ namespace Infrastructure.Persistence
             {
                 entity.Property(e => e.UnitPrice).HasColumnType("decimal(18, 2)");
 
+                entity.Property(e => e.CostPrice).HasColumnType("decimal(18, 2)");
+
                 entity.Property(e => e.SubTotal).HasColumnType("decimal(18, 2)");
             });
 
