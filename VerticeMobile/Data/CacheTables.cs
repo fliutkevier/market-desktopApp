@@ -67,9 +67,26 @@ public class CachedSale
     public int? InvoiceType { get; set; }
     public long? InvoiceNumber { get; set; }
 
-    /// <summary>Σ(costo × cantidad) de los ítems, calculado al guardar. Ganancia = Total − ItemsCost.</summary>
+    /// <summary>Σ(costo × cantidad) de los ítems, calculado al guardar.</summary>
     public decimal ItemsCost { get; set; }
     public int ItemCount { get; set; }
+
+    /// <summary>Σ subtotales de los ítems, antes del recargo/descuento del medio de pago.</summary>
+    public decimal ItemsSubTotal { get; set; }
+
+    /// <summary>Σ subtotales de "Varios / Fiambrería": precio abierto y sin costo cargado.</summary>
+    public decimal VariosSubTotal { get; set; }
+
+    /// <summary>Parte del total que corresponde a Varios, con el recargo/descuento del medio de pago aplicado.</summary>
+    [Ignore]
+    public decimal VariosTotal => ItemsSubTotal > 0 ? VariosSubTotal * Total / ItemsSubTotal : 0;
+
+    /// <summary>
+    /// Ganancia de la venta. Varios no entra: su costo está en 0 y daría 100% de ganancia.
+    /// Ganancia = (Total − Varios) − Σ(costo × cantidad).
+    /// </summary>
+    [Ignore]
+    public decimal Profit => Total - VariosTotal - ItemsCost;
 }
 
 [Table("SaleItems")]

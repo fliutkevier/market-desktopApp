@@ -12,6 +12,16 @@ public class LocalDb
     public const string KeyLastSync = "LastSync";
     public const string KeyLastServerTime = "LastServerTime";
     public const string KeySalesFingerprint = "SalesFingerprint";
+    private const string KeyCacheVersion = "CacheVersion";
+
+    /// <summary>
+    /// Subirlo cuando se agregan datos calculados a las ventas guardadas: las que ya estaban no
+    /// los tienen, así que se borran y la próxima sincronización las baja de nuevo.
+    /// </summary>
+    private const int CacheVersion = 2;
+
+    /// <summary>Producto comodín de precio abierto (fiambrería, etc.): no tiene costo cargado.</summary>
+    public const string CodigoVarios = "VARIOS";
 
     private readonly SQLiteAsyncConnection _db;
     private readonly SemaphoreSlim _initLock = new(1, 1);
@@ -38,6 +48,19 @@ public class LocalDb
                 await _db.CreateTablesAsync(CreateFlags.None,
                     typeof(CachedProduct), typeof(CachedPaymentMethod), typeof(CachedSession),
                     typeof(CachedSale), typeof(CachedSaleItem), typeof(SyncInfo));
+
+                var version = await _db.FindAsync<SyncInfo>(KeyCacheVersion);
+                if (version?.Value != CacheVersion.ToString())
+                {
+                    await _db.RunInTransactionAsync(conn =>
+                    {
+                        conn.DeleteAll<CachedSaleItem>();
+                        conn.DeleteAll<CachedSale>();
+                        conn.Delete<SyncInfo>(KeySalesFingerprint);
+                        conn.InsertOrReplace(new SyncInfo { Key = KeyCacheVersion, Value = CacheVersion.ToString() });
+                    });
+                }
+
                 _initialized = true;
             }
         }
@@ -162,12 +185,39 @@ public class LocalDb
         return await db.Table<CachedSale>().CountAsync();
     }
 
-    /// <summary>Cantidad, total vendido y costo de las ventas entre dos fechas (inclusive).</summary>
-    public async Task<(int Count, decimal Total, decimal Cost)> GetSalesSummaryAsync(DateTime from, DateTime to)
+    /// <summary>Ventas que cumplen el filtro, de la más nueva a la más vieja.</summary>
+    public async Task<List<CachedSale>> GetSalesAsync(SalesFilter filter)
     {
         var db = await GetDbAsync();
-        var sales = await db.Table<CachedSale>().Where(s => s.Date >= from && s.Date <= to).ToListAsync();
-        return (sales.Count, sales.Sum(s => s.Total), sales.Sum(s => s.ItemsCost));
+        var (where, args) = filter.ToSql("s");
+        return await db.QueryAsync<CachedSale>($"SELECT s.* FROM Sales s WHERE {where} ORDER BY s.Date DESC", args);
+    }
+
+    public async Task<CachedSale?> GetSaleAsync(int saleId)
+    {
+        var db = await GetDbAsync();
+        return await db.FindAsync<CachedSale>(saleId);
+    }
+
+    public async Task<List<CachedSaleItem>> GetSaleItemsAsync(int saleId)
+    {
+        var db = await GetDbAsync();
+        return await db.Table<CachedSaleItem>().Where(i => i.SaleId == saleId).ToListAsync();
+    }
+
+    /// <summary>
+    /// Productos vendidos en las ventas del filtro, agrupados, del que más facturó al que menos.
+    /// Importes antes del recargo/descuento del medio de pago (así figuran en cada ítem).
+    /// </summary>
+    public async Task<List<ProductSalesRow>> GetProductRankingAsync(SalesFilter filter)
+    {
+        var db = await GetDbAsync();
+        var (where, args) = filter.ToSql("s");
+        return await db.QueryAsync<ProductSalesRow>(
+            "SELECT TRIM(i.ProductCode) AS ProductCode, MAX(i.ProductName) AS ProductName, " +
+            "SUM(i.Quantity) AS Quantity, SUM(i.SubTotal) AS SubTotal, SUM(i.CostPrice * i.Quantity) AS Cost " +
+            $"FROM SaleItems i JOIN Sales s ON s.Id = i.SaleId WHERE {where} " +
+            "GROUP BY TRIM(i.ProductCode) ORDER BY SUM(i.SubTotal) DESC", args);
     }
 
     public async Task InsertSalesAsync(IEnumerable<SaleResponse> sales)
@@ -188,7 +238,9 @@ public class LocalDb
                     InvoiceType = s.InvoiceType,
                     InvoiceNumber = s.InvoiceNumber,
                     ItemsCost = s.Items.Sum(i => i.CostPrice * i.Quantity),
-                    ItemCount = s.Items.Count
+                    ItemCount = s.Items.Count,
+                    ItemsSubTotal = s.Items.Sum(i => i.SubTotal),
+                    VariosSubTotal = s.Items.Where(i => i.ProductCode.Trim() == CodigoVarios).Sum(i => i.SubTotal)
                 });
 
                 // Por si la venta ya estaba (una página que se cortó a la mitad): no duplicar ítems.
@@ -257,6 +309,7 @@ public class LocalDb
             conn.DeleteAll<CachedPaymentMethod>();
             conn.DeleteAll<CachedSession>();
             conn.DeleteAll<SyncInfo>();
+            conn.InsertOrReplace(new SyncInfo { Key = KeyCacheVersion, Value = CacheVersion.ToString() });
         });
     }
 }

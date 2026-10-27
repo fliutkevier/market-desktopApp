@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:VerticeMobile"
+             x:Class="VerticeMobile.ProductRankingPage"
+             Title="Productos Vendidos">
+
+    <Grid RowDefinitions="Auto, Auto, Auto, *" Padding="15,10,15,0" RowSpacing="8">
+
+        <Label Grid.Row="0" x:Name="lblDescription" FontSize="14" TextColor="#555" />
+
+        <Picker Grid.Row="1" x:Name="pkOrder" Title="Ordenar por" SelectedIndexChanged="OnOrderChanged" />
+
+        <SearchBar Grid.Row="2" x:Name="searchBar" Placeholder="Buscar producto..." TextChanged="OnSearchTextChanged" />
+
+        <CollectionView Grid.Row="3" x:Name="cvProducts" SelectionMode="None">
+            <CollectionView.EmptyView>
+                <Label Text="No hay productos vendidos con estos filtros." TextColor="Gray" HorizontalTextAlignment="Center" Margin="20" />
+            </CollectionView.EmptyView>
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="local:ProductRankingRow">
+                    <Border Padding="10" Margin="0,4" StrokeShape="RoundRectangle 6" BackgroundColor="#f8f9fa">
+                        <Grid ColumnDefinitions="Auto, *, Auto" RowDefinitions="Auto, Auto" ColumnSpacing="10">
+                            <Label Grid.Row="0" Grid.RowSpan="2" Grid.Column="0" Text="{Binding Position}" FontSize="16" FontAttributes="Bold" TextColor="#9C27B0" VerticalOptions="Center" />
+                            <Label Grid.Row="0" Grid.Column="1" Text="{Binding Name}" FontAttributes="Bold" FontSize="15" TextColor="#333" />
+                            <Label Grid.Row="1" Grid.Column="1" Text="{Binding Detail}" FontSize="12" TextColor="Gray" />
+                            <Label Grid.Row="0" Grid.Column="2" Text="{Binding SubTotal, StringFormat='{0:C2}'}" FontAttributes="Bold" FontSize="15" TextColor="Green" HorizontalOptions="End" />
+                            <Label Grid.Row="1" Grid.Column="2" Text="{Binding ProfitText}" FontSize="12" TextColor="#1565c0" HorizontalOptions="End" />
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+    </Grid>
+
+</ContentPage>
