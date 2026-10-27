@@ -2,7 +2,8 @@
     PUBLICAR UNA VERSIÓN NUEVA DE VERTICE POS
     -----------------------------------------
     1. Lee la versión de Vertice\WinForms.csproj (<Version>). Subirla ANTES de correr esto.
-    2. Publica el proyecto WinForms en Release (carpeta publish limpia).
+    2. Publica el proyecto WinForms en Release (carpeta publish limpia) y el servidor del
+       celular (proyecto Web) en la subcarpeta Api.
     3. Arma el instalador con Inno Setup (Instalador\VerticePOS.iss).
     4. Crea el Release "vX.Y.Z" en GitHub con el instalador adjunto. Desde ese momento, el
        botón "Buscar actualizaciones" de Ajustes lo encuentra.
@@ -84,6 +85,13 @@ if (Test-Path $pub) { Remove-Item $pub -Recurse -Force }
 
 & $dotnet publish "Vertice\WinForms.csproj" -c Release -r win-x64 --self-contained true -p:PublishSingleFile=false -o $pub -nologo -v q
 if ($LASTEXITCODE -ne 0) { throw "Falló dotnet publish." }
+
+# Servidor de la app del celular (proyecto Web -> VerticeApi.exe). Va dentro de la carpeta del
+# sistema, en Api\, para que se actualice junto con Vertice y nunca quede desfasado de la base.
+Paso "Publicando el servidor del celular (Web)"
+& $dotnet publish "Web\Web.csproj" -c Release -r win-x64 --self-contained true -p:PublishSingleFile=false -o "$pub\Api" -nologo -v q
+if ($LASTEXITCODE -ne 0) { throw "Falló dotnet publish del servidor del celular." }
+if (-not (Test-Path "$pub\Api\VerticeApi.exe")) { throw "No se encontró Api\VerticeApi.exe en la carpeta publish." }
 
 $claves = Get-ChildItem $pub -Recurse -File -Include *.key, *.pfx, *.p12, appsettings.local.json
 if ($claves) { throw "La carpeta publish tiene archivos que no pueden ir en el instalador: $($claves.Name -join ', ')" }

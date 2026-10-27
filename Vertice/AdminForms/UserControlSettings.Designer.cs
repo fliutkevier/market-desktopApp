@@ -44,6 +44,10 @@
             pbUpdate = new ProgressBar();
             btnInstallUpdate = new Krypton.Toolkit.KryptonButton();
             btnPreviousVersions = new Krypton.Toolkit.KryptonButton();
+            lblPinTitle = new Krypton.Toolkit.KryptonLabel();
+            txtMobilePin = new Krypton.Toolkit.KryptonTextBox();
+            btnGeneratePin = new Krypton.Toolkit.KryptonButton();
+            btnSavePin = new Krypton.Toolkit.KryptonButton();
             tlpSettings.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)cbxPrinters).BeginInit();
             SuspendLayout();
@@ -71,6 +75,10 @@
             tlpSettings.Controls.Add(pbUpdate, 3, 5);
             tlpSettings.Controls.Add(btnInstallUpdate, 3, 6);
             tlpSettings.Controls.Add(btnPreviousVersions, 4, 6);
+            tlpSettings.Controls.Add(lblPinTitle, 0, 6);
+            tlpSettings.Controls.Add(txtMobilePin, 1, 6);
+            tlpSettings.Controls.Add(btnGeneratePin, 0, 7);
+            tlpSettings.Controls.Add(btnSavePin, 1, 7);
             tlpSettings.Dock = DockStyle.Fill;
             tlpSettings.Location = new Point(0, 0);
             tlpSettings.Name = "tlpSettings";
@@ -272,7 +280,55 @@
             btnPreviousVersions.Values.DropDownArrowColor = Color.Empty;
             btnPreviousVersions.Values.Text = "VERSIONES ANTERIORES";
             btnPreviousVersions.Click += btnPreviousVersions_Click;
-            // 
+            //
+            // lblPinTitle
+            //
+            lblPinTitle.Anchor = AnchorStyles.None;
+            lblPinTitle.LabelStyle = Krypton.Toolkit.LabelStyle.TitlePanel;
+            lblPinTitle.Location = new Point(35, 506);
+            lblPinTitle.Name = "lblPinTitle";
+            lblPinTitle.Size = new Size(186, 36);
+            lblPinTitle.StateNormal.ShortText.Font = new Font("Microsoft Tai Le", 18F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            lblPinTitle.TabIndex = 34;
+            lblPinTitle.Values.Text = "PIN del celular";
+            //
+            // txtMobilePin
+            //
+            txtMobilePin.Anchor = AnchorStyles.Left;
+            txtMobilePin.Location = new Point(259, 511);
+            txtMobilePin.MaxLength = 12;
+            txtMobilePin.Name = "txtMobilePin";
+            txtMobilePin.Size = new Size(131, 27);
+            txtMobilePin.StateCommon.Content.Font = new Font("Microsoft Sans Serif", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            txtMobilePin.TabIndex = 35;
+            txtMobilePin.TextAlign = HorizontalAlignment.Center;
+            //
+            // btnGeneratePin
+            //
+            btnGeneratePin.Anchor = AnchorStyles.None;
+            btnGeneratePin.Location = new Point(62, 587);
+            btnGeneratePin.Name = "btnGeneratePin";
+            btnGeneratePin.Size = new Size(131, 40);
+            btnGeneratePin.StateCommon.Back.Color1 = Color.FromArgb(230, 233, 240);
+            btnGeneratePin.StateCommon.Content.ShortText.Font = new Font("Microsoft Sans Serif", 11.25F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            btnGeneratePin.TabIndex = 36;
+            btnGeneratePin.Values.DropDownArrowColor = Color.Empty;
+            btnGeneratePin.Values.Text = "GENERAR";
+            btnGeneratePin.Click += btnGeneratePin_Click;
+            //
+            // btnSavePin
+            //
+            btnSavePin.Anchor = AnchorStyles.Left;
+            btnSavePin.Location = new Point(259, 587);
+            btnSavePin.Name = "btnSavePin";
+            btnSavePin.Size = new Size(131, 40);
+            btnSavePin.StateCommon.Back.Color1 = Color.FromArgb(160, 205, 254);
+            btnSavePin.StateCommon.Content.ShortText.Font = new Font("Microsoft Sans Serif", 11.25F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            btnSavePin.TabIndex = 37;
+            btnSavePin.Values.DropDownArrowColor = Color.Empty;
+            btnSavePin.Values.Text = "GUARDAR";
+            btnSavePin.Click += btnSavePin_Click;
+            //
             // UserControlSettings
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -305,5 +361,9 @@
         private ProgressBar pbUpdate;
         private Krypton.Toolkit.KryptonButton btnInstallUpdate;
         private Krypton.Toolkit.KryptonButton btnPreviousVersions;
+        private Krypton.Toolkit.KryptonLabel lblPinTitle;
+        private Krypton.Toolkit.KryptonTextBox txtMobilePin;
+        private Krypton.Toolkit.KryptonButton btnGeneratePin;
+        private Krypton.Toolkit.KryptonButton btnSavePin;
     }
 }

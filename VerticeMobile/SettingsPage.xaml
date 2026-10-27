@@ -1,19 +1,42 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:controls="clr-namespace:VerticeMobile.Controls"
              x:Class="VerticeMobile.SettingsPage"
-             Title="Ajustes de Conexión">
+             Title="Ajustes">
 
-    <VerticalStackLayout Spacing="20" Padding="30" VerticalOptions="Center">
+    <Grid RowDefinitions="Auto, *">
 
-        <Label Text="Servidor Local" FontSize="22" FontAttributes="Bold" HorizontalOptions="Center" />
+        <controls:StatusBanner Grid.Row="0" />
 
-        <Label Text="Ingrese la IP de la computadora donde está el sistema de escritorio (Ej: 192.168.0.15):" FontSize="14" TextColor="Gray" HorizontalTextAlignment="Center" />
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Spacing="15" Padding="30,20">
 
-        <Entry x:Name="txtIpAddress" Placeholder="Ej: 192.000.0.00" Keyboard="Telephone" HorizontalTextAlignment="Center" FontSize="18"/>
+                <Label Text="Servidor Local" FontSize="22" FontAttributes="Bold" HorizontalOptions="Center" />
 
-        <Button Text="Guardar Configuración" Clicked="OnSaveClicked" BackgroundColor="#1976D2" TextColor="White" Margin="0,20,0,0"/>
+                <Label Text="IP de la computadora donde está el sistema de escritorio (Ej: 192.168.0.15):" FontSize="14" TextColor="Gray" HorizontalTextAlignment="Center" />
+                <Entry x:Name="txtIpAddress" Placeholder="Ej: 192.168.0.15" Keyboard="Telephone" HorizontalTextAlignment="Center" FontSize="18"/>
 
-    </VerticalStackLayout>
+                <Label Text="PIN (se ve en Ajustes de Vertice, en la PC):" FontSize="14" TextColor="Gray" HorizontalTextAlignment="Center" />
+                <Entry x:Name="txtPin" Placeholder="PIN" Keyboard="Numeric" IsPassword="True" HorizontalTextAlignment="Center" FontSize="18"/>
+
+                <Grid ColumnDefinitions="*, *" ColumnSpacing="10" Margin="0,10,0,0">
+                    <Button Grid.Column="0" x:Name="btnTest" Text="Probar Conexión" Clicked="OnTestClicked" BackgroundColor="#607D8B" TextColor="White" />
+                    <Button Grid.Column="1" x:Name="btnSave" Text="Guardar" Clicked="OnSaveClicked" BackgroundColor="#1976D2" TextColor="White" />
+                </Grid>
+
+                <BoxView HeightRequest="1" Color="#E0E0E0" Margin="0,15" />
+
+                <Label Text="Datos Guardados" FontSize="22" FontAttributes="Bold" HorizontalOptions="Center" />
+                <Label Text="Se pueden consultar sin conexión. Se actualizan al abrir la app y al volver a ella." FontSize="14" TextColor="Gray" HorizontalTextAlignment="Center" />
+
+                <Label x:Name="lblCacheInfo" FontSize="15" TextColor="#333" HorizontalTextAlignment="Center" />
+
+                <Button x:Name="btnSyncNow" Text="Actualizar Ahora" Clicked="OnSyncNowClicked" BackgroundColor="#2E7D32" TextColor="White" />
+                <Button Text="Borrar Datos Guardados" Clicked="OnClearCacheClicked" BackgroundColor="Transparent" TextColor="#C62828" />
+
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
 
 </ContentPage>

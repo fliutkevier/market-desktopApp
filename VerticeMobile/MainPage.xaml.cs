@@ -1,41 +1,52 @@
-﻿using System.Net.Http.Json;
-using ZXing.Net.Maui;
+﻿using VerticeMobile.Data;
+using VerticeMobile.Models;
+using VerticeMobile.Services;
 
 namespace VerticeMobile
 {
     public partial class MainPage : ContentPage
     {
-        // 10.0.2.2 es la forma en que el emulador de Android ve a tu PC (localhost).
-        // Si usás tu celular físico con WiFi, tenés que poner la IP de tu PC (ej: 192.168.0.x)
-        //private const string ApiBaseUrl = "http://192.168.100.96:5000/products/";
-        private readonly HttpClient _httpClient;
+        private readonly ApiClient _api;
+        private readonly LocalDb _db;
+        private readonly ConnectionState _state;
+        private readonly SyncService _sync;
         private string _currentScannedCode = "";
 
-        public MainPage()
+        public MainPage(ApiClient api, LocalDb db, ConnectionState state, SyncService sync)
         {
             InitializeComponent();
-            _httpClient = new HttpClient();
-            //_httpClient.BaseAddress = new Uri(ApiBaseUrl);
-            _httpClient.Timeout = TimeSpan.FromSeconds(10);
-
-            // Ya no configuramos el BarcodeReader acá
+            _api = api;
+            _db = db;
+            _state = state;
+            _sync = sync;
         }
 
-        // BOTÓN PARA ABRIR LA PANTALLA DE AJUSTES
-        private async void OnSettingsClicked(object sender, EventArgs e)
+        protected override void OnAppearing()
         {
-            await Navigation.PushAsync(new SettingsPage());
+            base.OnAppearing();
+            _state.Changed += OnConnectionChanged;
+            UpdateWriteButtons();
         }
 
-        // FUNCIÓN QUE ARMA LA RUTA COMPLETA LEYENDO LA IP EN TIEMPO REAL
-        private string GetApiUrl(string path = "")
+        protected override void OnDisappearing()
         {
-            string ip = Microsoft.Maui.Storage.Preferences.Default.Get("ApiIpAddress", "");
-            if (string.IsNullOrEmpty(ip)) return "";
-
-            string baseUrl = $"http://{ip}:5000/products";
-            return string.IsNullOrEmpty(path) ? baseUrl : $"{baseUrl}/{path}";
+            base.OnDisappearing();
+            _state.Changed -= OnConnectionChanged;
         }
+
+        private void OnConnectionChanged(object? sender, EventArgs e) => UpdateWriteButtons();
+
+        // Crear y modificar solo con conexión: sin la PC no hay dónde guardarlo.
+        private void UpdateWriteButtons()
+        {
+            bool online = _state.IsOnline;
+            btnEditMode.IsEnabled = online;
+            btnCreate.IsEnabled = online;
+            btnSaveEdit.IsEnabled = online;
+        }
+
+        // ¿Vale la pena intentar contra la PC? Si ya sabemos que no hay conexión, directo a la copia local.
+        private bool ShouldTryServer => _state.Status is ConnectionStatus.Online or ConnectionStatus.Unknown;
 
         private async void OnToggleScannerClicked(object sender, EventArgs e)
         {
@@ -63,17 +74,19 @@ namespace VerticeMobile
 
         private async void OnSearchClicked(object sender, EventArgs e)
         {
-            string code = txtBarcode.Text?.Trim();
+            string code = txtBarcode.Text?.Trim() ?? "";
             if (string.IsNullOrEmpty(code)) return;
 
-            // VALIDAMOS QUE HAYA IP CONFIGURADA ANTES DE BUSCAR
-            string url = GetApiUrl(code);
-            if (string.IsNullOrEmpty(url))
+            if (!_api.IsConfigured)
             {
-                await DisplayAlertAsync("Aviso", "Primero configure la IP del servidor local en el botón de Ajustes ⚙️.", "OK");
+                await DisplayAlertAsync("Aviso", "Primero configure la IP y el PIN en la pestaña Ajustes ⚙️.", "OK");
                 return;
             }
 
+            // En la base hay códigos cargados con espacios adelante, y la PC los busca exactos: si
+            // la copia local lo conoce, se usa el código tal cual está guardado.
+            var known = await _db.GetProductAsync(code);
+            code = known?.Code ?? code;
             _currentScannedCode = code; // Lo guardamos en memoria
 
             btnSearch.IsEnabled = false;
@@ -81,32 +94,35 @@ namespace VerticeMobile
             lblError.IsVisible = false;
             borderResult.IsVisible = false;
             borderCreate.IsVisible = false; // Ocultamos el form de creación por si estaba abierto
+            borderEdit.IsVisible = false;
 
             try
             {
-                var response = await _httpClient.GetAsync(url);
+                if (ShouldTryServer && await SearchOnServerAsync(code))
+                    return;
 
-                if (response.IsSuccessStatusCode)
+                await SearchInCacheAsync(code);
+            }
+            finally
+            {
+                btnSearch.IsEnabled = true;
+                btnSearch.Text = "Por Código";
+            }
+        }
+
+        /// <summary>Busca en la PC. Devuelve false si no hubo conexión (para buscar en la copia local).</summary>
+        private async Task<bool> SearchOnServerAsync(string code)
+        {
+            try
+            {
+                var product = await _api.GetProductAsync(code);
+
+                if (product != null)
                 {
-                    var product = await response.Content.ReadFromJsonAsync<ProductMobileDto>();
-                    if (product != null)
-                    {
-                        lblName.Text = product.Name;
-                        lblCostPrice.Text = $"Costo: {product.CostPrice:C0}";
-                        lblSalePrice.Text = $"Venta: {product.SalePrice:C0}";
-                        lblStock.Text = $"Stock: {product.Stock}";
-
-                        // Pre-llenar campos de edición (por si el usuario decide modificarlo)
-                        txtEditName.Text = product.Name;
-                        txtEditCost.Text = product.CostPrice.ToString("0");
-                        txtEditPrice.Text = product.SalePrice.ToString("0");
-                        txtEditStock.Text = product.Stock.ToString();
-                        txtEditPercentage.Text = ""; // Lo dejamos vacío para que decida si quiere aplicar un % nuevo
-
-                        borderResult.IsVisible = true; // info
-                    }
+                    ShowProduct(product, fromCache: false);
+                    await _db.SaveProductAsync(product); // la copia local queda al día con lo que se vio
                 }
-                else if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+                else
                 {
                     //formulario de creación
                     txtNewName.Text = "";
@@ -117,28 +133,71 @@ namespace VerticeMobile
 
                     borderCreate.IsVisible = true; //formulario de alta
                 }
-                else
-                {
-                    lblError.Text = $"Error de servidor: {response.StatusCode}";
-                    lblError.IsVisible = true;
-                }
+                return true;
             }
-            catch (Exception ex)
+            catch (ApiException ex)
             {
-                lblError.Text = $"Error de red: {ex.Message}";
+                if (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+                    _state.SetStatus(ConnectionStatus.Unauthorized, ex.Message);
+
+                lblError.Text = ex.Message;
                 lblError.IsVisible = true;
+                return true;
             }
-            finally
+            catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
             {
-                btnSearch.IsEnabled = true;
-                btnSearch.Text = "Buscar Producto";
+                _state.SetStatus(ConnectionStatus.Offline);
+                return false;
             }
+        }
+
+        private async Task SearchInCacheAsync(string code)
+        {
+            var cached = await _db.GetProductAsync(code);
+            if (cached == null)
+            {
+                lblError.Text = "No está en los datos guardados. Para darlo de alta hay que estar conectado a la PC del local.";
+                lblError.IsVisible = true;
+                return;
+            }
+
+            ShowProduct(new ProductResponse
+            {
+                Code = cached.Code,
+                Name = cached.Name,
+                SalePrice = cached.SalePrice,
+                CostPrice = cached.CostPrice,
+                Stock = cached.Stock,
+                LastStockUpdate = cached.LastStockUpdate
+            }, fromCache: true);
+        }
+
+        private void ShowProduct(ProductResponse product, bool fromCache)
+        {
+            lblName.Text = product.Name;
+            lblCostPrice.Text = $"Costo: {product.CostPrice:C0}";
+            lblSalePrice.Text = $"Venta: {product.SalePrice:C0}";
+            lblStock.Text = $"Stock: {product.Stock}";
+
+            lblCachedNotice.IsVisible = fromCache;
+            lblCachedNotice.Text = _state.LastSync is DateTime d
+                ? $"Sin conexión: datos guardados del {d:dd/MM HH:mm}"
+                : "Sin conexión: datos guardados";
+
+            // Pre-llenar campos de edición (por si el usuario decide modificarlo)
+            txtEditName.Text = product.Name;
+            txtEditCost.Text = product.CostPrice.ToString("0");
+            txtEditPrice.Text = product.SalePrice.ToString("0");
+            txtEditStock.Text = product.Stock.ToString();
+            txtEditPercentage.Text = ""; // Lo dejamos vacío para que decida si quiere aplicar un % nuevo
+
+            borderResult.IsVisible = true; // info
         }
 
         private async void OnSearchByNameClicked(object sender, EventArgs e)
         {
             // Usamos PushAsync para que vuelva a tener la barra superior con el botón Atrás
-            await Navigation.PushAsync(new ProductListPage((codigoElegido) =>
+            await Navigation.PushAsync(new ProductListPage(_db, _sync, (codigoElegido) =>
             {
                 txtBarcode.Text = codigoElegido;
                 OnSearchClicked(this, EventArgs.Empty);
@@ -174,15 +233,11 @@ namespace VerticeMobile
                 return;
             }
 
-            string url = GetApiUrl(_currentScannedCode);
-            if (string.IsNullOrEmpty(url)) return;
-
             decimal.TryParse(txtNewCost.Text, out decimal cost);
             decimal.TryParse(txtNewPrice.Text, out decimal price);
             int.TryParse(txtNewStock.Text, out int stock);
 
-            // 2. Armar el DTO para el backend
-            // ATENCIÓN: Revisá que estas propiedades coincidan con el CreateProductDto de tu API.
+            // 2. Armar el DTO para el backend (CreateProductDto de la API)
             var newProduct = new CreateProductMobileDto
             {
                 Code = _currentScannedCode, // Usamos el código que falló en la búsqueda
@@ -197,37 +252,36 @@ namespace VerticeMobile
 
             try
             {
-                // USAMOS LA URL DINÁMICA ACÁ
-                var response = await _httpClient.PostAsJsonAsync(url, newProduct);
+                await _api.CreateProductAsync(_currentScannedCode, newProduct);
 
-                if (response.IsSuccessStatusCode)
+                var saved = new ProductResponse
                 {
-                    // 1. Ocultamos el formulario de alta
-                    borderCreate.IsVisible = false;
+                    Code = _currentScannedCode,
+                    Name = newProduct.Name,
+                    CostPrice = cost,
+                    SalePrice = price,
+                    Stock = stock,
+                    LastStockUpdate = DateTime.Now
+                };
+                await _db.SaveProductAsync(saved);
 
-                    // 2. Cargamos los datos en la tarjeta de resultado visual
-                    lblName.Text = newProduct.Name;
-                    lblCostPrice.Text = $"Costo: {newProduct.CostPrice:C0}";
-                    lblSalePrice.Text = $"Venta: {newProduct.SalePrice:C0}";
-                    lblStock.Text = $"Stock actual: {newProduct.InitialStock} unid.";
-
-                    // 3. Mostramos el resultado como si lo hubiéramos buscado
-                    borderResult.IsVisible = true;
-                }
-                else
-                {
-                    string errorObj = await response.Content.ReadAsStringAsync();
-                    await DisplayAlertAsync("Error al guardar", errorObj, "OK");
-                }
+                // Mostramos el resultado como si lo hubiéramos buscado
+                borderCreate.IsVisible = false;
+                ShowProduct(saved, fromCache: false);
             }
-            catch (Exception ex)
+            catch (ApiException ex)
             {
-                await DisplayAlertAsync("Error de Red", ex.Message, "OK");
+                await DisplayAlertAsync("Error al guardar", ex.Message, "OK");
+            }
+            catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
+            {
+                _state.SetStatus(ConnectionStatus.Offline);
+                await DisplayAlertAsync("Sin conexión", "No se pudo conectar con la PC. El producto no se guardó.", "OK");
             }
             finally
             {
-                btnCreate.IsEnabled = true;
                 btnCreate.Text = "Guardar Producto";
+                UpdateWriteButtons();
             }
         }
 
@@ -247,14 +301,11 @@ namespace VerticeMobile
         {
             if (string.IsNullOrWhiteSpace(txtEditName.Text)) return;
 
-            string url = GetApiUrl(_currentScannedCode);
-            if (string.IsNullOrEmpty(url)) return;
-
             decimal.TryParse(txtEditCost.Text, out decimal cost);
             decimal.TryParse(txtEditPrice.Text, out decimal price);
             int.TryParse(txtEditStock.Text, out int stock);
 
-            // DTO de actualización. 
+            // DTO de actualización (UpdateProductDto de la API)
             var editProduct = new EditProductMobileDto
             {
                 Code = _currentScannedCode,
@@ -269,45 +320,36 @@ namespace VerticeMobile
 
             try
             {
-                // USAMOS LA URL DINÁMICA ACÁ
-                var response = await _httpClient.PutAsJsonAsync(url, editProduct);
+                await _api.UpdateProductAsync(_currentScannedCode, editProduct);
 
-                if (response.IsSuccessStatusCode)
+                var saved = new ProductResponse
                 {
-                    // Actualizamos la tarjeta de resultado visual con los datos nuevos
-                    lblName.Text = editProduct.Name;
-                    lblCostPrice.Text = $"Costo: {editProduct.CostPrice:C0}";
-                    lblSalePrice.Text = $"Venta: {editProduct.SalePrice:C0}";
-                    lblStock.Text = $"Stock: {editProduct.Stock}";
+                    Code = _currentScannedCode,
+                    Name = editProduct.Name,
+                    CostPrice = cost,
+                    SalePrice = price,
+                    Stock = stock,
+                    LastStockUpdate = DateTime.Now
+                };
+                await _db.SaveProductAsync(saved);
 
-                    borderEdit.IsVisible = false;
-                    borderResult.IsVisible = true; // Volvemos a mostrar el GET actualizado
-                }
-                else
-                {
-                    string errorObj = await response.Content.ReadAsStringAsync();
-                    await DisplayAlertAsync("Error", errorObj, "OK");
-                }
+                borderEdit.IsVisible = false;
+                ShowProduct(saved, fromCache: false); // Volvemos a mostrar la tarjeta con los datos nuevos
             }
-            catch (Exception ex)
+            catch (ApiException ex)
             {
-                await DisplayAlertAsync("Error de Red", ex.Message, "OK");
+                await DisplayAlertAsync("Error", ex.Message, "OK");
+            }
+            catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
+            {
+                _state.SetStatus(ConnectionStatus.Offline);
+                await DisplayAlertAsync("Sin conexión", "No se pudo conectar con la PC. Los cambios no se guardaron.", "OK");
             }
             finally
             {
-                btnSaveEdit.IsEnabled = true;
+                UpdateWriteButtons();
             }
         }
-    }
-
-    // DTO local para la app móvil
-    public class ProductMobileDto
-    {
-        public string? Code { get; set; }
-        public string? Name { get; set; }
-        public decimal SalePrice { get; set; }
-        public decimal CostPrice { get; set; }
-        public int Stock { get; set; }
     }
 
     public class CreateProductMobileDto

@@ -71,9 +71,17 @@ Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
 Name: "{commondesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon
 
 [Run]
+; Firewall para el servidor del celular (Api\VerticeApi.exe, puerto 5000). Se borra y se vuelve a
+; crear para no acumular reglas repetidas en cada actualización. profile=any porque Windows suele
+; marcar el wifi del local como red "Pública"; el acceso igual queda protegido por el PIN.
+Filename: "{sys}\netsh.exe"; Parameters: "advfirewall firewall delete rule name=""{#MyAppName} - Servidor celular"""; Flags: runhidden
+Filename: "{sys}\netsh.exe"; Parameters: "advfirewall firewall add rule name=""{#MyAppName} - Servidor celular"" dir=in action=allow program=""{app}\Api\VerticeApi.exe"" protocol=TCP localport=5000 profile=any"; Flags: runhidden
 ; Sin "skipifsilent": cuando la actualización se lanza desde el sistema (modo /SILENT, con
 ; la barra de progreso visible), al terminar vuelve a abrir el sistema solo.
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#MyAppName}}"; Flags: nowait postinstall
+
+[UninstallRun]
+Filename: "{sys}\netsh.exe"; Parameters: "advfirewall firewall delete rule name=""{#MyAppName} - Servidor celular"""; Flags: runhidden; RunOnceId: "BorrarReglaFirewall"
 
 [Code]
 const
@@ -156,8 +164,26 @@ begin
   end;
 end;
 
+// El sistema cierra el servidor del celular al salir, pero si se cortó la luz o se cerró de golpe
+// puede quedar corriendo solo y trabar los archivos de {app}\Api.
+procedure CerrarServidorCelular();
+var
+  ResultCode: Integer;
+begin
+  Exec(ExpandConstant('{sys}\taskkill.exe'), '/F /IM VerticeApi.exe', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+end;
+
 procedure CurStepChanged(CurStep: TSetupStep);
 begin
   if CurStep = ssInstall then
+  begin
+    CerrarServidorCelular();
     MigrarConfiguracionYCertificados();
+  end;
+end;
+
+procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
+begin
+  if CurUninstallStep = usUninstall then
+    CerrarServidorCelular();
 end;

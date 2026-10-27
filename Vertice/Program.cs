@@ -81,12 +81,19 @@ namespace Vertice
         {
             try
             {
-                string? apiPath = config["ApiPath"];
+                string? apiPath = MobileApi.ResolvePath(config);
 
-                if (string.IsNullOrWhiteSpace(apiPath) || !File.Exists(apiPath))
+                if (apiPath == null)
                 {
                     MessageBox.Show("El servidor del celular no está configurado o la ruta es incorrecta.\n\nPor favor, vaya a la sección 'Ajustes' en el sistema y seleccione el archivo ejecutable de la API.", "Servidor Offline", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     return;
+                }
+
+                // Sin PIN el servidor rechaza todo: la primera vez se genera uno, que después se
+                // ve y se cambia en Ajustes. El servidor lo lee del mismo archivo de esta PC.
+                if (string.IsNullOrWhiteSpace(config[MobileApi.PinKey]))
+                {
+                    LocalSettings.Save(new Dictionary<string, string> { [MobileApi.PinKey] = MobileApi.GeneratePin() });
                 }
 
                 var startInfo = new ProcessStartInfo

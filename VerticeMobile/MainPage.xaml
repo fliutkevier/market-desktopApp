@@ -2,16 +2,18 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:zxing="clr-namespace:ZXing.Net.Maui.Controls;assembly=ZXing.Net.MAUI.Controls"
+             xmlns:controls="clr-namespace:VerticeMobile.Controls"
              x:Class="VerticeMobile.MainPage"
              Title="Control de Productos">
 
-    <!-- AÑADIMOS EL BOTÓN DE AJUSTES EN LA BARRA SUPERIOR -->
-    <ContentPage.ToolbarItems>
-        <ToolbarItem Text="⚙️ Ajustes" Clicked="OnSettingsClicked" />
-    </ContentPage.ToolbarItems>
+    <!-- Ajustes ahora es una pestaña propia (AppShell) -->
 
-    <ScrollView>
-        <VerticalStackLayout Spacing="25" Padding="30,0" VerticalOptions="Center">
+    <Grid RowDefinitions="Auto, *">
+
+    <controls:StatusBanner Grid.Row="0" />
+
+    <ScrollView Grid.Row="1">
+        <VerticalStackLayout Spacing="25" Padding="30,20" VerticalOptions="Center">
 
             <Label Text="Buscador de Productos" FontSize="28" FontAttributes="Bold" HorizontalOptions="Center" />
 
@@ -42,6 +44,7 @@
                         <Label x:Name="lblSalePrice" FontSize="18" TextColor="Green" FontAttributes="Bold" />
                     </HorizontalStackLayout>
                     <Label x:Name="lblStock" FontSize="16" TextColor="#555" />
+                    <Label x:Name="lblCachedNotice" FontSize="13" TextColor="#E65100" IsVisible="False" />
 
                     <Button x:Name="btnEditMode" Text="Modificar Producto" Clicked="OnEditModeClicked" BackgroundColor="#1976D2" TextColor="White" Margin="0,10,0,0"/>
                 </VerticalStackLayout>
@@ -97,5 +100,7 @@
 
         </VerticalStackLayout>
     </ScrollView>
+
+    </Grid>
 
 </ContentPage>

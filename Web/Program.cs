@@ -7,7 +7,15 @@ using Microsoft.EntityFrameworkCore;
 using Web.Services;
 using Application.AuditLogs;
 using Application.AuditLogs.Interfaces;
-var builder = WebApplication.CreateBuilder(args);
+using Web.Security;
+// ContentRoot = carpeta del .exe: el appsettings.json se encuentra aunque lo arranquen desde otra carpeta.
+var builder = WebApplication.CreateBuilder(new WebApplicationOptions { Args = args, ContentRootPath = AppContext.BaseDirectory });
+
+// Configuración de esta PC, la misma que usa Vertice (C:\ProgramData\VerticeApp): de ahí sale el
+// PIN del celular que se configura en Ajustes. reloadOnChange para tomar un PIN nuevo sin reiniciar.
+builder.Configuration.AddJsonFile(
+    Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "VerticeApp", "appsettings.local.json"),
+    optional: true, reloadOnChange: true);
 
 // 1. Configurar Base de Datos (Le pasamos la conexión del appsettings.json)
 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -22,6 +30,7 @@ builder.Services.AddScoped<IAuditLogRepository, AuditLogRepository>();
 // Servicios
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IAuditLogService, AuditLogService>();
+builder.Services.AddScoped<MobileSyncService>();
 
 // CRÍTICO: El ProductService necesita un IUserSessionService.
 // Como acá no hay pantalla de Login, le pasamos una implementación hardcodeada temporal.
@@ -44,6 +53,7 @@ if (app.Environment.IsDevelopment())
 // Para probar en la red local, usamos HTTP plano.
 // app.UseHttpsRedirection(); 
 
+app.UseMiddleware<PinMiddleware>();
 app.UseAuthorization();
 app.MapControllers();
 

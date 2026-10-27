@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:controls="clr-namespace:VerticeMobile.Controls"
+             x:Class="VerticeMobile.SalesPage"
+             Title="Ventas">
+
+    <!-- Etapa 1: resumen simple para comprobar que las ventas se guardan en el celular.
+         La pantalla completa (filtros, listado, ganancia) es la etapa 2. -->
+    <Grid RowDefinitions="Auto, *">
+
+        <controls:StatusBanner Grid.Row="0" />
+
+        <RefreshView Grid.Row="1" x:Name="refreshView" Refreshing="OnRefreshing">
+            <ScrollView>
+                <VerticalStackLayout Spacing="15" Padding="30,20">
+
+                    <Label Text="Ventas de Hoy" FontSize="22" FontAttributes="Bold" HorizontalOptions="Center" />
+
+                    <Border BackgroundColor="#f8f9fa" Padding="15">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="10" />
+                        </Border.StrokeShape>
+                        <VerticalStackLayout Spacing="8">
+                            <Label x:Name="lblTodayCount" FontSize="16" TextColor="#555" />
+                            <Label x:Name="lblTodayTotal" FontSize="22" FontAttributes="Bold" TextColor="Green" />
+                            <Label x:Name="lblTodayProfit" FontSize="16" TextColor="#1565c0" />
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <Label x:Name="lblStored" FontSize="14" TextColor="Gray" HorizontalTextAlignment="Center" />
+
+                    <Label Text="Próximamente: listado de ventas con filtros por fecha, facturación, caja y medio de pago."
+                           FontSize="13" TextColor="Gray" HorizontalTextAlignment="Center" Margin="0,20,0,0" />
+
+                </VerticalStackLayout>
+            </ScrollView>
+        </RefreshView>
+    </Grid>
+
+</ContentPage>

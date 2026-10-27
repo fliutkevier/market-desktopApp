@@ -58,9 +58,14 @@ namespace WinForms.AdminForms
             }
 
             string savedPath = _config["ApiPath"] ?? "";
-            lblApiPath.Text = string.IsNullOrWhiteSpace(savedPath) ? "Ruta no configurada" : savedPath;
+            if (File.Exists(MobileApi.BundledPath))
+                lblApiPath.Text = "Incluido en el sistema";
+            else
+                lblApiPath.Text = string.IsNullOrWhiteSpace(savedPath) ? "Ruta no configurada" : savedPath;
 
             cbxPrinters.Text = _config.GetSection("Arca")["PrinterName"] ?? "";
+
+            txtMobilePin.Text = _config[MobileApi.PinKey] ?? "";
 
             lblVersion.Text = $"Versión instalada: {ReleaseInfo.VersionToText(UpdateService.CurrentVersion)}";
         }
@@ -290,7 +295,7 @@ namespace WinForms.AdminForms
             try
             {
                 string pathParaGuardar = lblApiPath.Text.Trim();
-                if (pathParaGuardar == "Ruta no configurada")
+                if (pathParaGuardar == "Ruta no configurada" || pathParaGuardar == "Incluido en el sistema")
                 {
                     pathParaGuardar = "";
                 }
@@ -304,6 +309,33 @@ namespace WinForms.AdminForms
                 });
 
                 MessageBox.Show("Configuración guardada exitosamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error al guardar: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void btnGeneratePin_Click(object sender, EventArgs e)
+        {
+            txtMobilePin.Text = MobileApi.GeneratePin();
+        }
+
+        private void btnSavePin_Click(object sender, EventArgs e)
+        {
+            string pin = txtMobilePin.Text.Trim();
+            if (pin.Length < 4)
+            {
+                MessageBox.Show("El PIN tiene que tener al menos 4 caracteres.", "PIN", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            try
+            {
+                // El servidor del celular lee este mismo archivo y toma el PIN nuevo al instante:
+                // los celulares que tenían el anterior dejan de poder conectarse.
+                LocalSettings.Save(new Dictionary<string, string> { [MobileApi.PinKey] = pin });
+                MessageBox.Show("PIN guardado. Cargá el mismo PIN en Ajustes de la app del celular.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch (Exception ex)
             {

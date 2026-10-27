@@ -4,11 +4,27 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:local="clr-namespace:VerticeMobile"
-    Title="VerticeMobile">
+    Shell.TabBarBackgroundColor="White"
+    Shell.TabBarForegroundColor="#1976D2"
+    Shell.TabBarTitleColor="#1976D2"
+    Shell.TabBarUnselectedColor="#90A4AE"
+    Title="Vertice">
 
-    <ShellContent
-        Title="Home"
-        ContentTemplate="{DataTemplate local:MainPage}"
-        Route="MainPage" />
+    <TabBar>
+        <ShellContent
+            Title="📦 Productos"
+            ContentTemplate="{DataTemplate local:MainPage}"
+            Route="MainPage" />
+
+        <ShellContent
+            Title="💰 Ventas"
+            ContentTemplate="{DataTemplate local:SalesPage}"
+            Route="SalesPage" />
+
+        <ShellContent
+            Title="⚙️ Ajustes"
+            ContentTemplate="{DataTemplate local:SettingsPage}"
+            Route="SettingsPage" />
+    </TabBar>
 
 </Shell>

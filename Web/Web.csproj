@@ -4,6 +4,9 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <!-- Nombre propio del .exe: el instalador lo cierra por nombre antes de actualizar, y
+         "Web.exe" podría ser otro programa de la PC. -->
+    <AssemblyName>VerticeApi</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>
