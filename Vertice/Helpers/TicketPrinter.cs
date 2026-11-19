@@ -205,7 +205,7 @@ namespace WinForms.Helpers
 
             // Leyenda obligatoria de Defensa del Consumidor (Bs. As.). Se dibuja dentro del ancho
             // del ticket para que, si no entra en un renglón, pase al siguiente en vez de cortarse.
-            const string leyendaConsumidor = "Orientación al Consumidor Provincia de Buenos Aires 148";
+            const string leyendaConsumidor = "Orientación al Consumidor Bs. As. 148";
             var areaLeyenda = new RectangleF(left, y, ContentWidth - left, 100);
             g.DrawString(leyendaConsumidor, fontRegular, brush, areaLeyenda);
             y += g.MeasureString(leyendaConsumidor, fontRegular, (int)areaLeyenda.Width).Height + 4;
