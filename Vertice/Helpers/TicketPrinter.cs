@@ -203,6 +203,13 @@ namespace WinForms.Helpers
             g.DrawString("A CONSUMIDOR FINAL", fontBold, brush, left, y);
             y += 18;
 
+            // Leyenda obligatoria de Defensa del Consumidor (Bs. As.). Se dibuja dentro del ancho
+            // del ticket para que, si no entra en un renglón, pase al siguiente en vez de cortarse.
+            const string leyendaConsumidor = "Orientación al Consumidor Provincia de Buenos Aires 148";
+            var areaLeyenda = new RectangleF(left, y, ContentWidth - left, 100);
+            g.DrawString(leyendaConsumidor, fontRegular, brush, areaLeyenda);
+            y += g.MeasureString(leyendaConsumidor, fontRegular, (int)areaLeyenda.Width).Height + 4;
+
             if (datosQr.tipoDocRec != 99 && datosQr.tipoDocRec != 0)
             {
                 string tipo = datosQr.tipoDocRec == 80 ? "CUIT" : "DNI";
